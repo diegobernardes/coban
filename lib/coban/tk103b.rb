@@ -11,7 +11,11 @@ module Coban
         result = self.message_heartbeat(content)
       end
 
-      return result
+      if result == nil
+        InvalidMessage.new "Error parsing message"
+      else
+        return result
+      end
     rescue
       InvalidMessage.new "Error parsing message"
     end
@@ -24,6 +28,7 @@ module Coban
         :door, :fuel, :oil, :temperatura
       ]
 
+      # Pre-process and split the raw content into array positions
       splited_content = content.gsub('imei:','').gsub(';','').split(',', -1)
 
       result = {
@@ -53,8 +58,8 @@ module Coban
       longitude = pre_longitude[0...3].to_i(10) + ( pre_longitude[3...pre_longitude.size].to_f / 60 )
       longitude *= -1 if splited_content[message_headers.index(:east_west)] == 'W'
 
-      result[:latitude] = latitude
-      result[:longitude] = longitude
+      result[:latitude] = latitude.round(8)
+      result[:longitude] = longitude.round(8)
 
       date = splited_content[message_headers.index(:date)]
       time = splited_content[message_headers.index(:time)]
@@ -63,16 +68,22 @@ module Coban
         result[:date] = DateTime.strptime('20' + date[0...6] + time.split('.').first,'%Y%m%d%H%M%S')
       end
 
+      result[:type] = 'message'
+      result[:sub_type] = 'tracker'
+      result[:response] = nil
+
       return result
     end
 
     def self.message_logon(content)
       result = /##,imei:(?<imei>\d*).*;/.match(content)
+      return nil if result[:imei].empty?
       return { imei: result[:imei], type: :logon, response: 'LOAD' } if result
     end
 
     def self.message_heartbeat(content)
       result = /(?<imei>\d*)/.match(content)
+      return nil if result[:imei].empty?
       return { imei: result[:imei], type: :heartbeat, response: 'ON' } if result
     end
   end

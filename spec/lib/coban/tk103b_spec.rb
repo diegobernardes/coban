@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe Coban::TK103B do
+  it "it should raise a InvalidMessage error" do
+    Coban::TK103B.parse('adasdasdasd').class.should == Coban::InvalidMessage
+  end
+
   it "it should parse logon message" do
     message = '##,imei:359710041775538,A;'
     expected = { imei: '359710041775538', type: :logon, response: 'LOAD' }
@@ -16,7 +20,8 @@ describe Coban::TK103B do
   it "it should parse message" do
     message = 'imei:359710041775538,tracker,1403230739,,F,233944.000,A,2256.6289,S,04301.8645,W,0.81,152.26,,1,0,0.30%,,;'
     expected = { imei: "359710041775538", 
-     type: "tracker", 
+     type: "message", 
+     sub_type: "tracker",
      phone: "", 
      gps_status: "F", 
      gps_signal: "A", 
@@ -30,7 +35,8 @@ describe Coban::TK103B do
      temperatura: "", 
      latitude: -22.943815, 
      longitude: -43.031075, 
-     date: DateTime.new(2014, 03, 23, 23, 39, 44)
+     date: DateTime.new(2014, 03, 23, 23, 39, 44),
+     response: nil
    }
    Coban::TK103B.parse(message).should == expected
  end
