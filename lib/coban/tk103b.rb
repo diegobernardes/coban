@@ -12,12 +12,12 @@ module Coban
       end
 
       if result == nil
-        InvalidMessage.new "Error parsing message"
+        throw InvalidMessage.new "Error parsing message"
       else
         return result
       end
     rescue
-      InvalidMessage.new "Error parsing message"
+      throw InvalidMessage.new "Error parsing message"
     end
 
     def self.message(content)

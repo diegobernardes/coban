@@ -2,7 +2,11 @@ require 'spec_helper'
 
 describe Coban::TK103B do
   it "it should raise a InvalidMessage error" do
-    Coban::TK103B.parse('adasdasdasd').class.should == Coban::InvalidMessage
+    begin
+      Coban::TK103B.parse('adasdasdasd')
+    rescue Exception => e
+      e.class == Coban::InvalidMessage
+    end
   end
 
   it "it should parse logon message" do
